@@ -198,7 +198,7 @@ pub async fn main() {
         .cloned()
         .coalesce(|lh, rh| {
             if lh.len() + rh.len() < 400000 {
-                Ok(lh + " " + &rh)
+                Ok(lh + &rh)
             } else {
                 Err((lh, rh))
             }

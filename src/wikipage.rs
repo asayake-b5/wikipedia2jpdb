@@ -2,7 +2,7 @@ use std::{collections::HashSet, fmt::Display};
 
 use scraper::{Html, Selector};
 
-use crate::{query, Queriable};
+use crate::{filtering, query, Queriable};
 
 #[derive(Debug, Eq, PartialEq, Clone, Hash, Default)]
 pub struct WikiPage(pub String);
@@ -40,16 +40,9 @@ impl WikiPage {
         let selector = Selector::parse("div").unwrap();
 
         let div = fragment.select(&selector).next().unwrap();
-        let mut text: Vec<String> = div.text().map(|e| e.to_string()).collect();
-        let mut set_to_ignore: HashSet<&str> = HashSet::new();
-        set_to_ignore.insert("\n");
-        set_to_ignore.insert("\n\n");
-        set_to_ignore.insert(" ");
-        set_to_ignore.insert("（");
-        set_to_ignore.insert("）");
-        set_to_ignore.insert("^");
-        set_to_ignore.insert(" - ");
-        text.retain(|e| !set_to_ignore.contains(e as &str));
+        let mut text: Vec<String> = div.text().map(|e| filtering::filter_noise(e)).collect();
+        // let mut text: HashSet<String> = div.text().map(|e| filtering::filter_noise(e)).collect();
+        text.retain(|e| !filtering::IGNORED_ENTRIES.contains(e as &str));
         text
     }
 

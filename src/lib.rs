@@ -1,4 +1,5 @@
 pub mod category;
+pub mod filtering;
 pub mod wikipage;
 
 pub trait Queriable {
