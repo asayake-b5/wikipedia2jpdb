@@ -1,0 +1,30 @@
+* Wikipedia to JPDB
+A (still sortof WIP) wikipedia st
+** Rationale
+JPDB is great, however it, for obvious reasons, strays away a lot for all that has to do with non-fiction text. Of course it is possible to acquire enough vocabulary to easily read non-fiction eventually through reading a lot of fiction, however it could be good to easily scratch away some vocab that pertains to a given field (broadly, like Science or Cooking, or more precisely like Astronomy, Biking, Fishing and so on...).
+
+However, scrapping individual websites for content gets tiresome and is hard to automate, so, let's use humankind's biggest encyclopedia instead!
+
+** Installing
+With rust/cargo installed:
+#+begin_src bash
+cargo build --release
+#+end_src
+And then fetch the executable in target/release/wikipedia2jpdb, copy paste it where you want and run it. The program is guided so just answer the questions!
+
+When the program becomes more mature(more details below), releases will be automatically uploaded to github.
+
+** How it works
+
+It starts with a page or category:
+  - if it's a category it'll pull all pages from the category, and ask for what subcategories you're interested, repeat for as long as you want
+  - if it's a page, it'll grab that page and neighbours, and then parent categories, and do the same thing as above
+Then most of the noise is stripped to keep only japanese characters, and spilt in small chunks to import into jpdb.
+It's important to have a good balance on the amount of pages (more isn't necesarily better, if you add very irrelevant pages).
+
+** Drawbacks/Todo
+So far, the text somehow stumbles to be imported in jpdb, for a reason I haven't pinned yet. Therefore, I'm starting to think about alternatives. I might end up offloading the text analysis to the program, and then importing into jpdb through the shirabe jisho import, or as a text file with the words in chronological order.
+
+https://github.com/tshatrov/ichiran/ looks interesting for that, as an alternative to mecab.
+
+Until that is solved, this effectively keeps the program WIP for now. Something like cb's text analyser could give you interesting data that you can exploit already, if you are so inclined.
