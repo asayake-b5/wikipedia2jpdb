@@ -1,9 +1,8 @@
 use std::collections::HashSet;
 
 use futures::{stream, StreamExt};
-use inquire::{MultiSelect, Select};
+use inquire::{required, MultiSelect, Select, Text};
 use itertools::Itertools;
-use mediawiki::page::Page;
 use wikipedia2jpdb::{category::Category, wikipage::WikiPage, Queriable};
 
 const YES_NO: [&str; 2] = ["Yes", "No"];
@@ -100,19 +99,21 @@ pub async fn main() {
         stack: Vec::with_capacity(50),
         ..Default::default()
     };
-    // WikiPage::page_contents("自転車").await;
-
-    // Category::subcategories("Category:天文学");
-    // TODO validator of the url?
-    // let origin = Text::new("What is the page you want to start crawling from?")
-    //     .with_placeholder("Category:Something or Page:Something")
-    //     .with_validator(required!())
-    //     .prompt()
-    //     .unwrap();
     // let title = "Category:天文学";
+    #[cfg(debug_assertions)]
     let title = "自転車";
+    #[cfg(not(debug_assertions))]
+    // TODO validator of the url?
+    let title = Text::new("What is the page you want to start crawling from?")
+        .with_placeholder("Category:Something or SomethingElse")
+        .with_validator(required!())
+        .prompt()
+        .unwrap();
+    let title: &str = title.as_ref();
+
     if title.contains("Category:") {
-        let root_cat = Category::from_full(title);
+        // okay unwrap, because we test the same thing, the presence of Category:
+        let root_cat = Category::from_full(title).unwrap();
         execution
             .pages
             .extend(Category::pages(root_cat.full_title().as_str()).await);
@@ -183,7 +184,7 @@ pub async fn main() {
 
     //TODO try to clean up to use &str again, because of the async stuff
     // maybe with execution.pages.iter instead
-    let thingies: Vec<Vec<String>> = stream::iter(execution.pages)
+    let thingies: Vec<HashSet<String>> = stream::iter(execution.pages)
         .map(|page| {
             // let page = page.clone();
             WikiPage::page_contents(page.0)
@@ -206,8 +207,10 @@ pub async fn main() {
         .collect();
     dbg!(text.len());
     text.iter().enumerate().for_each(|(i, contents)| {
-        let file_path = format!("TODOii{i}.txt");
-        std::fs::write(file_path, &contents).unwrap();
+        std::fs::create_dir_all(format!("./out/{title}/"))
+            .expect("Unable to create directory out/ !");
+        let file_path = format!("out/{title}/{title}-{i}.txt");
+        std::fs::write(file_path, &contents).expect("Error writing file.");
     });
     // let text = text.join("");
     // dbg!(thingies);

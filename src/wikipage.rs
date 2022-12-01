@@ -19,7 +19,7 @@ impl Display for WikiPage {
 }
 
 impl WikiPage {
-    pub async fn page_contents(page: String) -> Vec<String> {
+    pub async fn page_contents(page: String) -> HashSet<String> {
         let params = &[
             ("action", "parse"),
             ("prop", "text"),
@@ -32,7 +32,7 @@ impl WikiPage {
             None => {
                 println!("{res:?}");
                 println!("Error parsing page {page}");
-                return Vec::new();
+                return HashSet::new();
             }
         };
 
@@ -40,9 +40,10 @@ impl WikiPage {
         let selector = Selector::parse("div").unwrap();
 
         let div = fragment.select(&selector).next().unwrap();
-        let mut text: Vec<String> = div.text().map(|e| filtering::filter_noise(e)).collect();
-        // let mut text: HashSet<String> = div.text().map(|e| filtering::filter_noise(e)).collect();
+        // let mut text: Vec<String> = div.text().map(|e| filtering::filter_noise(e)).collect();
+        let mut text: HashSet<String> = div.text().map(filtering::filter_noise).collect();
         text.retain(|e| !filtering::IGNORED_ENTRIES.contains(e as &str));
+        // dbg!(&text);
         text
     }
 
